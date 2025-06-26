@@ -19,65 +19,33 @@ function extractCryptoTags(text) {
 
 app.get('/news', async (req, res) => {
     try {
-        const headers = {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/114.0.0.0 Safari/537.36'
+        const articles = [
+            {
+                title: "Bitcoin rompe US$ 70 mil novamente",
+                summary: "Movimento pode sinalizar nova alta no mercado.",
+                link: "https://www.coindesk.com/bitcoin-price",
+                source: "mock",
+                cryptos: ["BTC"],
+                date: new Date().toISOString(),
+                sentiment: "positive"
+            },
+            {
+                title: "Solana ganha destaque com novos projetos",
+                summary: "Atividade de desenvolvedores cresce na rede SOL.",
+                link: "https://www.coindesk.com/solana-update",
+                source: "mock",
+                cryptos: ["SOL"],
+                date: new Date().toISOString(),
+                sentiment: "neutral"
             }
-        };
+        ];
 
-        const [messariData, coindeskData] = await Promise.all([
-            axios.get('https://messari.io/news', headers),
-            axios.get('https://www.coindesk.com', headers)
-        ]);
-
-        const $messari = cheerio.load(messariData.data);
-        const $coindesk = cheerio.load(coindeskData.data);
-
-        const articles = [];
-
-        // Messari
-        $messari('a[href^="/article/"]').each((i, el) => {
-            const title = $messari(el).find('h5').text().trim();
-            const summary = $messari(el).find('p').text().trim();
-            const link = 'https://messari.io' + $messari(el).attr('href');
-            if (title) {
-                articles.push({
-                    title,
-                    summary,
-                    link,
-                    source: "messari",
-                    cryptos: extractCryptoTags(title + ' ' + summary),
-                    date: new Date().toISOString(),
-                    sentiment: "neutral"
-                });
-            }
-        });
-
-        // CoinDesk
-        $coindesk('a.card-article').each((i, el) => {
-            const title = $coindesk(el).find('h4').text().trim();
-            const summary = $coindesk(el).find('p').text().trim();
-            const href = $coindesk(el).attr('href');
-            const link = href?.startsWith('http') ? href : `https://www.coindesk.com${href}`;
-            if (title) {
-                articles.push({
-                    title,
-                    summary,
-                    link,
-                    source: "coindesk",
-                    cryptos: extractCryptoTags(title + ' ' + summary),
-                    date: new Date().toISOString(),
-                    sentiment: "neutral"
-                });
-            }
-        });
-
-        res.json(articles.slice(0, 30));
+        res.json(articles);
     } catch (err) {
-        console.error("ERRO AO BUSCAR NOTÍCIAS:", err.message || err);
         res.status(500).json({ error: "Erro ao buscar notícias" });
     }
 });
+
 
 app.listen(PORT, () => {
     console.log(`API real rodando na porta ${PORT}`);
