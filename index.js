@@ -1,5 +1,8 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
+
+app.use(cors()); // ✅ Libera requisições de outros domínios
 
 app.get('/news', (req, res) => {
   res.json([
